@@ -1,0 +1,1065 @@
+\documentclass[11pt,a4paper]{article}
+
+% ── Packages ──────────────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage[breakable,skins]{tcolorbox}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{graphicx}
+\usepackage{needspace}
+
+\geometry{margin=2.5cm, headsep=14pt}
+
+% ── Colors ────────────────────────────────────────────────
+\definecolor{defblue}{RGB}{0,80,160}
+\definecolor{keyred}{RGB}{180,30,30}
+\definecolor{noteorange}{RGB}{200,120,0}
+\definecolor{intugreen}{RGB}{30,130,60}
+\definecolor{lightgray}{RGB}{245,245,245}
+\definecolor{notabg}{RGB}{250,250,235}
+
+% ── tcolorbox environments ────────────────────────────────
+\newtcolorbox{keyidea}[1][]{%
+  breakable, colback=red!5!white, colframe=keyred,
+  fonttitle=\bfseries, title={Key Idea: #1}}
+
+\newtcolorbox{intuition}[1][]{%
+  breakable, colback=green!5!white, colframe=intugreen,
+  fonttitle=\bfseries, title={Intuition: #1}}
+
+\newtcolorbox{definition}[1][]{%
+  breakable, colback=blue!5!white, colframe=defblue,
+  fonttitle=\bfseries, title={Definition: #1}}
+
+\newtcolorbox{warning}[1][]{%
+  breakable, colback=orange!5!white, colframe=noteorange,
+  fonttitle=\bfseries, title={Note: #1}}
+
+\newtcolorbox{notationbox}[1][]{%
+  breakable, colback=notabg, colframe=noteorange!70!black,
+  fonttitle=\bfseries, title={Notation: #1}}
+
+% ── Theorem-like environments ─────────────────────────────
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+% ── Shortcuts (matching num_math notation) ────────────────
+%    Basis functions : \psi_i           (Lectures 14--16)
+%    Discrete space  : V_n              (Lecture 14)
+%    Galerkin matrix : A_n              (Lecture 14)
+%    Unknowns        : d_i              (Lecture 14)
+%    Discrete soln   : u_n              (Lecture 14)
+%    Test (discrete) : v_n              (Lecture 14)
+%    Bilinear form   : a(\cdot,\cdot)   (all lectures)
+%    Linear form     : \ell(\cdot) / F  (Lectures 14--15)
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\dd}{\,\mathrm{d}}
+\newcommand{\pd}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\norm}[1]{\left\| #1 \right\|}
+\newcommand{\abs}[1]{\left| #1 \right|}
+\newcommand{\inner}[2]{\left\langle #1,\, #2 \right\rangle}
+\newcommand{\dx}{\,\mathrm{d}x}
+\newcommand{\ds}{\,\mathrm{d}s}
+\newcommand{\dA}{\,\mathrm{d}A}
+\newcommand{\Vn}{V_n}
+\newcommand{\un}{u_n}
+\newcommand{\vn}{v_n}
+
+% jump brackets (no extra package needed)
+\newcommand{\jump}[1]{[\![#1]\!]}
+
+% ── Header / Footer ───────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small FEM for Navier--Stokes\;---\;Study Guide}
+\fancyhead[R]{\small SS\,2026}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ── Title formatting ──────────────────────────────────────
+% Each chapter (section) starts on a new page.
+% Subsections and below keep at least 4 lines with their body.
+\titleformat{\section}
+  {\Large\bfseries\color{defblue}}{Chapter \thesection:}{0.5em}{}
+\titlespacing*{\section}{0pt}{0pt}{6pt}
+
+\titleformat{\subsection}
+  {\large\bfseries\color{defblue!80!black}}{\thesubsection}{0.5em}{}
+\titleformat{\subsubsection}
+  {\normalsize\bfseries\color{defblue!60!black}}{\thesubsubsection}{0.5em}{}
+
+% Prevent orphaned headings: keep subsection/subsubsection/paragraph
+% glued to at least a few lines of the following content.
+\titlespacing*{\subsection}{0pt}{12pt plus 2pt minus 2pt}{4pt}
+\titlespacing*{\subsubsection}{0pt}{10pt plus 2pt minus 2pt}{3pt}
+
+% Hook: before every \subsection, demand at least 6\baselineskip
+\let\origsubsection\subsection
+\renewcommand{\subsection}{\needspace{6\baselineskip}\origsubsection}
+\let\origsubsubsection\subsubsection
+\renewcommand{\subsubsection}{\needspace{5\baselineskip}\origsubsubsection}
+\let\origparagraph\paragraph
+\renewcommand{\paragraph}[1]{\needspace{4\baselineskip}\origparagraph{#1}}
+
+\hypersetup{
+  colorlinks=true, linkcolor=defblue, urlcolor=defblue!70!black
+}
+
+% ══════════════════════════════════════════════════════════
+\begin{document}
+
+\begin{center}
+  {\LARGE\bfseries FEM for the Navier--Stokes Equations}\\[4pt]
+  {\Large Personal Study Guide}\\[10pt]
+  {\large Based on prerequisite lectures (Num.\ Math.\ II)
+          and Chapter~2 slides}\\[6pt]
+  {\normalsize SS\,2026 \quad$\cdot$\quad TU Berlin
+               \quad$\cdot$\quad Dr.\ Peter M\"unch}\\[12pt]
+  \rule{0.6\textwidth}{0.4pt}
+\end{center}
+
+\vspace{0.3cm}
+
+\begin{notationbox}[Conventions used in this document]
+This guide follows the notation of the \textbf{Num.\ Math.\ II} lectures
+(Breiten \& May).  The Chapter~2 slides (M\"unch) use slightly different
+symbols.  A translation table is provided in Section~\ref{sec:notation}.
+
+\medskip
+\renewcommand{\arraystretch}{1.2}
+\begin{center}
+\begin{tabular}{@{}lcc@{}}
+  \toprule
+  \textbf{Concept} & \textbf{Num.\ Math.\ II} & \textbf{Chapter~2 slides}\\
+  \midrule
+  Basis / shape functions & $\psi_i$       & $\varphi_j$     \\
+  Discrete subspace       & $V_n$          & $V_h$            \\
+  Discrete solution       & $u_n$          & $u_h$            \\
+  Unknown coefficients    & $d_i$          & $U_j$            \\
+  Galerkin / stiffness matrix & $A_n$      & $K$              \\
+  Right-hand-side vector  & $\mathbf{f}$   & $F$              \\
+  \bottomrule
+\end{tabular}
+\end{center}
+\end{notationbox}
+
+\vspace{0.2cm}
+\tableofcontents
+\newpage
+
+% ══════════════════════════════════════════════════════════
+\section{The Big Picture}
+\label{sec:bigpicture}
+% ══════════════════════════════════════════════════════════
+
+The entire FEM pipeline answers one question:
+\textbf{how do we turn a PDE (a continuous, infinite-dimensional problem)
+into a linear system $A_n\,\mathbf{d} = \mathbf{f}$ that a computer can
+solve?}
+
+\begin{keyidea}[The FEM Pipeline]
+\begin{center}
+\small
+$\displaystyle
+  \underset{\text{\normalsize strong form}}{\boxed{\;-\Delta u = f\;}}
+  \;\xrightarrow[\text{integrate}]{\text{multiply by }v}\;
+  \underset{\text{\normalsize weak form}}{\boxed{\;a(u,v) = \ell(v)\;}}
+$
+
+\bigskip
+
+$\displaystyle
+  \xrightarrow[\text{dim.\ reduction}]{\text{Galerkin}}\;
+  \underset{\text{\normalsize discrete form}}{\boxed{\;a(\un,\vn)=\ell(\vn)\;}}
+  \;\xrightarrow[\text{$\un=\sum d_i\psi_i$}]{\text{basis expansion}}\;
+  \underset{\text{\normalsize linear system}}{\boxed{\;A_n\,\mathbf{d}=\mathbf{f}\;}}
+$
+\end{center}
+Every concept below is a piece of this chain.
+\end{keyidea}
+
+% ══════════════════════════════════════════════════════════
+\newpage
+\section{The Model Problem: Poisson Equation}
+\label{sec:poisson}
+% ══════════════════════════════════════════════════════════
+
+\subsection{Strong form}
+
+Let $\Omega \subset \R^d$ be a bounded domain with boundary
+$\partial\Omega = \Gamma_D \cup \Gamma_N$, $\Gamma_D \cap \Gamma_N = \emptyset$.
+
+\begin{definition}[Poisson equation --- strong form]
+Find $u : \bar{\Omega} \to \R$ such that
+\begin{alignat}{2}
+  -\Delta u &= f        &\quad& \text{in } \Omega,
+    \label{eq:poisson}\\
+         u  &= g        &\quad& \text{on } \Gamma_D
+    \quad\text{(Dirichlet b.c.)}, \label{eq:dirichlet}\\
+  \pd{u}{n} &= h        &\quad& \text{on } \Gamma_N
+    \quad\text{(Neumann b.c.)}. \label{eq:neumann}
+\end{alignat}
+Here $\Delta u = \sum_{i=1}^{d}\dfrac{\partial^2 u}{\partial x_i^2}$
+is the Laplacian and
+$\dfrac{\partial u}{\partial n} = \nabla u \cdot \mathbf{n}$
+is the outward normal derivative.
+\end{definition}
+
+\begin{intuition}[What does the Poisson equation model?]
+Think of $u$ as temperature.
+The source term $f$ describes where heat is generated or absorbed.
+The Laplacian $\Delta u$ measures how much $u$ at a point differs from
+its average over nearby points.
+The equation says: at steady state, the curvature of $u$ is balanced
+by the source~$f$.
+
+\medskip
+\textbf{Dirichlet b.c.}\;($u = g$): we prescribe the \emph{value} on
+part of the boundary (e.g.\ fixed temperature).\\[2pt]
+\textbf{Neumann b.c.}\;($\partial u/\partial n = h$): we prescribe the
+\emph{flux} on the rest (e.g.\ insulated wall $\Rightarrow h=0$).
+\end{intuition}
+
+% ══════════════════════════════════════════════════════════
+\newpage
+\section{From Strong to Weak Form}
+\label{sec:weak}
+% ══════════════════════════════════════════════════════════
+
+\textit{Source: Num.\ Math.\ II, Lecture~12.}
+
+\subsection{Why we need a weak form}
+
+The strong form~\eqref{eq:poisson} requires
+$u \in C^2(\Omega) \cap C(\bar{\Omega})$, i.e.\ $u$ must be twice
+continuously differentiable.  This is too restrictive:
+\begin{itemize}[nosep]
+  \item Materials with discontinuous properties (e.g.\ a dielectric
+        constant that jumps) produce solutions with ``kinks''
+        (Lecture~15, num\_math).
+  \item The weak form only needs \emph{first} derivatives, admitting
+        rougher but physically meaningful solutions.
+\end{itemize}
+
+\subsection{Derivation (4 steps)}
+
+\begin{definition}[Function spaces]
+The \textbf{Sobolev space} $H^1(\Omega)$ contains all functions that are
+square-integrable together with their first (weak) derivatives:
+\[
+  H^1(\Omega)
+  = \bigl\{\, v : \Omega \to \R
+    \;\big|\;
+    v \in L^2(\Omega),\;
+    \nabla v \in [L^2(\Omega)]^d
+    \bigr\}.
+\]
+Important subspaces used in the lectures:
+\begin{align*}
+  C_0^2(\bar{\Omega})
+    &= \bigl\{\, v \in C^2(\bar{\Omega})
+       \;\big|\; v(0) = 0 = v(1) \bigr\}
+    && \text{(Lecture~12: first test space)},\\[2pt]
+  V_0
+    &= \bigl\{\, v \in H^1(\Omega)
+       \;\big|\; v = 0 \text{ on } \Gamma_D \bigr\}
+    && \text{(general Dirichlet test space)},\\[2pt]
+  V
+    &= \bigl\{\, v \in H^1(\Omega)
+       \;\big|\; v = 0 \text{ on } \Gamma_D \bigr\}
+    && \text{(trial space, when $g=0$; otherwise lifted)}.
+\end{align*}
+\end{definition}
+
+\medskip\noindent
+Starting from $-\Delta u = f$ in $\Omega$:
+
+\paragraph{Step 1: Multiply by a test function and integrate.}
+Let $v \in V_0$ (so $v = 0$ on $\Gamma_D$).
+Multiply both sides by~$v$ and integrate over~$\Omega$:
+\[
+  \int_\Omega (-\Delta u)\, v \dx
+  = \int_\Omega f\, v \dx.
+\]
+
+\paragraph{Step 2: Integration by parts (Green's first identity).}
+
+\begin{keyidea}[The central trick]
+Integration by parts shifts one derivative from $u$ onto $v$.
+Recall the multivariate product rule (Lecture~12, p.\,4):
+$\operatorname{div}(v\,\nabla u) = \nabla u \cdot \nabla v + v\,\Delta u$.
+Integrating and applying Gauss's theorem:
+\[
+  \int_\Omega (-\Delta u)\, v \dx
+  \;=\;
+  \underbrace{\int_\Omega \nabla u \cdot \nabla v \dx}_{%
+    \text{only first derivatives!}}
+  \;-\;
+  \underbrace{\int_{\partial\Omega}
+    v \cdot \pd{u}{n} \dA}_{\text{boundary integral}}.
+\]
+This is why the weak form needs only first derivatives of both $u$
+and $v$.
+\end{keyidea}
+
+\paragraph{Step 3: Apply boundary conditions.}
+Split the boundary integral over $\Gamma_D$ and $\Gamma_N$:
+\begin{itemize}[nosep]
+  \item On $\Gamma_D$: $v = 0$ by choice of test space
+        $\;\Rightarrow\;$ integral vanishes.
+  \item On $\Gamma_N$: $\partial u/\partial n = h$ (Neumann data)
+        $\;\Rightarrow\;$ integral becomes
+        $\displaystyle\int_{\Gamma_N} h\,v\ds$.
+\end{itemize}
+(Lecture~12, p.\,4 shows this step-by-step for the 2D case with
+$\Gamma = \Gamma_1 \cup \Gamma_2$.)
+
+\paragraph{Step 4: Write the weak form.}
+
+\begin{definition}[Weak / variational formulation\; (VP)]
+Find $u \in V$ such that
+\begin{equation}
+  \boxed{\;a(u,v) = \ell(v) \qquad \forall\, v \in V_0\;}
+  \label{eq:weak}
+\end{equation}
+where the \textbf{bilinear form} and \textbf{linear functional} are:
+\begin{align}
+  a(u,v)  &= \int_\Omega \nabla u \cdot \nabla v \dx,
+             \label{eq:bilinear}\\[4pt]
+  \ell(v) &= \int_\Omega f\, v \dx
+             + \int_{\Gamma_N} h\, v \ds.
+             \label{eq:linear}
+\end{align}
+\end{definition}
+
+\begin{intuition}[Why does weak\,$=$\,strong?]
+Lecture~12 proves this using the \textbf{Fundamental Lemma of Calculus of
+Variations}: if\, $\int_\Omega g(x)\,h(x)\dx = 0$\, for all smooth $h$
+with compact support, then $g \equiv 0$.
+
+Applied here: define $g(x) = -u''(x) - f(x)$.  The weak form says
+$\int g\,v\dx = 0$ for all $v \in C_0^\infty$.  By the lemma,
+$g \equiv 0$, i.e.\ $-u'' = f$ pointwise---recovering the strong form.
+So the two formulations are \textbf{equivalent} whenever $u$ is smooth
+enough.
+\end{intuition}
+
+\begin{warning}[Neumann b.c.\ are ``natural'']
+Neumann conditions appear \emph{automatically} in the weak form via the
+boundary integral---you do \emph{not} enforce them explicitly.
+Dirichlet conditions, by contrast, are \emph{essential}: they are
+enforced by restricting the function space
+(Lecture~17, num\_math).
+\end{warning}
+
+% ══════════════════════════════════════════════════════════
+\newpage
+\section{The Galerkin Method}
+\label{sec:galerkin}
+% ══════════════════════════════════════════════════════════
+
+\textit{Source: Num.\ Math.\ II, Lecture~14.}
+
+\subsection{Three-step recipe}
+
+\paragraph{Step 1 (known): Find the variational / weak form.}
+Find $u \in V$ such that $a(u,v) = \ell(v)$ for all $v \in V$.
+The space $V$ is infinite-dimensional---we cannot work with it directly
+on a computer.
+
+\paragraph{Step 2 (new): Galerkin dimension reduction.}
+For each $n \in \N$, let $\Vn \subset V$ be a subspace with
+$\dim(\Vn) = n$.  Pick a basis $\{\psi_1, \ldots, \psi_n\}$ of $\Vn$.
+
+\begin{definition}[Galerkin equation]
+Find $\un \in \Vn$ such that
+\[
+  a(\un, \vn) = \ell(\vn)
+  \qquad \forall\, \vn \in V_{0,n} \subset V_0.
+\]
+\end{definition}
+
+\paragraph{Step 3 (new): Derive a linear system of equations.}
+Since $\Vn$ is finite-dimensional, every element can be written as
+\[
+  \un(x) = \sum_{i=1}^{n} d_i\,\psi_i(x),
+\]
+where $d_1, \ldots, d_n \in \R$ are the unknown coefficients.
+
+\begin{keyidea}[Testing with basis functions $\psi_j$ is enough]
+Instead of testing with arbitrary $\vn \in \Vn$, it suffices to test
+with each basis function $\psi_j$, $j = 1, \ldots, n$.
+
+\medskip\noindent
+\textit{Why?}\; Any $\vn = \sum_{j} \beta_j\,\psi_j$.
+By linearity of $a$ and $\ell$:
+\[
+  a(\un,\vn) = \ell(\vn)
+  \;\;\Longrightarrow\;\;
+  \sum_j \beta_j\bigl[a(\un,\psi_j) - \ell(\psi_j)\bigr] = 0.
+\]
+Since the $\beta_j$ are arbitrary, each bracket must vanish individually.
+\end{keyidea}
+
+Substituting $\un = \sum_{i} d_i\,\psi_i$ and testing with $\psi_j$:
+\[
+  a\!\Bigl(\sum_{i=1}^n d_i\,\psi_i,\;\psi_j\Bigr)
+  = \ell(\psi_j)
+  \qquad\xRightarrow{\text{bilinearity}}\qquad
+  \sum_{i=1}^n d_i\, a(\psi_i,\psi_j) = \ell(\psi_j).
+\]
+This is a linear system of $n$ equations for $n$ unknowns:
+
+\begin{equation}
+  \boxed{\;A_n\,\mathbf{d} = \mathbf{f}\;}
+  \label{eq:system}
+\end{equation}
+with
+\begin{align}
+  (A_n)_{ji}
+    &= a(\psi_i,\, \psi_j)
+     = \int_\Omega \nabla\psi_i \cdot \nabla\psi_j \dx,
+    \label{eq:stiffness}\\[4pt]
+  f_j
+    &= \ell(\psi_j)
+     = \int_\Omega f\,\psi_j \dx
+       + \int_{\Gamma_N} h\,\psi_j \ds.
+    \label{eq:load}
+\end{align}
+
+\medskip
+$A_n \in \R^{n \times n}$ is the \textbf{Galerkin matrix}
+(also called \textbf{stiffness matrix}),
+$\mathbf{f} \in \R^n$ is the \textbf{right-hand-side (load) vector},
+and $\mathbf{d} = (d_1,\ldots,d_n)^T$ are the unknown
+\textbf{degrees of freedom} (DOFs).
+
+\subsection{Galerkin orthogonality and best approximation}
+
+\textit{Source: Num.\ Math.\ II, Lecture~14, p.\,2.}
+
+\medskip\noindent
+Since the true solution $u$ of~(VP) satisfies $a(u,v) = \ell(v)$ for all
+$v \in V$, in particular for all $\vn \in \Vn \subset V$:
+\[
+  a(u,\vn) = \ell(\vn) = a(\un,\vn)
+  \qquad\forall\,\vn \in \Vn.
+\]
+Subtracting:
+
+\begin{definition}[Galerkin orthogonality]
+\begin{equation}
+  \boxed{\;a(u - \un,\;\vn) = 0
+         \qquad \forall\, \vn \in \Vn\;}
+  \label{eq:galerkin-orth}
+\end{equation}
+The error $u - \un$ is ``$a$-orthogonal'' to the entire discrete
+subspace~$\Vn$.
+\end{definition}
+
+\begin{intuition}[Best approximation]
+If $a$ is symmetric and positive definite, Galerkin orthogonality means
+$\un$ is the \textbf{closest} element in $\Vn$ to the true solution $u$,
+measured in the \textbf{energy norm}
+$\norm{v}_a = \sqrt{a(v,v)}$:
+\[
+  \norm{u - \un}_a
+  = \inf_{\vn \in \Vn} \norm{u - \vn}_a.
+\]
+The FEM does not give just \emph{some} approximation---it gives the
+\textbf{best possible} one from the chosen subspace.
+\end{intuition}
+
+\subsection{Properties of the bilinear form}
+
+\textit{Source: Num.\ Math.\ II, Lecture~14, p.\,2.}
+
+\begin{definition}[Bilinear form properties]
+Let $V$ be an $\R$-vector space and $a : V \times V \to \R$ a bilinear
+form.  We call~$a$:
+\begin{itemize}[nosep]
+  \item \textbf{symmetric}, if $a(u,v) = a(v,u)$ for all $u,v \in V$;
+  \item \textbf{positive definite}, if $a(u,u) \geq 0$ for all $u$
+        and $a(u,u) = 0$ if and only if $u = 0$;
+  \item \textbf{negative definite}, if $-a$ is positive definite.
+\end{itemize}
+If $a$ is positive definite, the variational problem has a
+\textbf{unique} solution.
+\end{definition}
+
+\begin{warning}[Positive definiteness depends on the space!]
+Lecture~14 (p.\,3) gives a crucial example:
+$a(u,v) = \int_\Omega \nabla u \cdot \nabla v\dx$.
+\begin{enumerate}[nosep]
+  \item On $V = \{v \in H^1(\Omega) \mid \partial v/\partial n = 0
+        \text{ on } \partial\Omega\}$:
+        $a$ is \textbf{not} positive definite
+        (constant functions have $\nabla u = 0$ but $u \neq 0$).
+  \item On $V_0 = \{v \in H^1(\Omega) \mid v = 0
+        \text{ on } \partial\Omega\}$:
+        $a$ \textbf{is} positive definite
+        (Dirichlet b.c.\ kill the constants).
+\end{enumerate}
+The choice of boundary conditions determines whether the problem is
+well-posed!
+\end{warning}
+
+% ══════════════════════════════════════════════════════════
+\newpage
+\section{Finite Elements: The Choice of $V_n$}
+\label{sec:elements}
+% ══════════════════════════════════════════════════════════
+
+\textit{Source: Num.\ Math.\ II, Lectures~15--16.}
+
+\medskip\noindent
+The Galerkin method works for any subspace $\Vn$.
+The key question is: how to choose $\Vn$ (and hence $\psi_1,\ldots,\psi_n$)
+so that (a)~the approximation is accurate, (b)~$A_n$ is sparse and
+easy to assemble, and (c)~$\Vn$ behaves well as $n \to \infty$?
+
+The answer from Lecture~15: \textbf{hat functions} (piecewise linear
+polynomials on a mesh).
+
+\subsection{Admissible decomposition (mesh)}
+
+\begin{definition}[Admissible decomposition]
+Decompose $\bar{\Omega} = \bigcup_{i=1}^{n_e} \bar{\Omega}_i$ into
+elements.  The decomposition is \textbf{admissible} if for each pair
+$i \neq j$ exactly one of the following holds:
+\begin{enumerate}[nosep]
+  \item $\bar{\Omega}_i \cap \bar{\Omega}_j = \emptyset$ \quad(disjoint),
+  \item $\bar{\Omega}_i \cap \bar{\Omega}_j$ is a complete shared
+        face/edge/vertex.
+\end{enumerate}
+\begin{itemize}[nosep]
+  \item In 1D ($d=1$): non-overlapping intervals
+        $\Omega_\ell = (x_{\ell-1}, x_\ell)$,
+        $\ell = 1,\ldots,n_e = N+1$.
+  \item In 2D ($d=2$): triangles or convex quadrilaterals with
+        compatible edges (Lecture~15, p.\,3 illustrates admissible
+        vs.\ non-admissible decompositions).
+\end{itemize}
+\end{definition}
+
+\subsection{Shape functions (basis functions $\psi_i$)}
+
+\subsubsection{1D: hat functions (Lectures~15--16)}
+
+For a 1D mesh $a = x_0 < x_1 < \cdots < x_N < x_{N+1} = b$, the
+\textbf{linear Lagrange basis} (``hat functions'' / ``pyramid functions'')
+are:
+\[
+  \psi_i(x) = \begin{cases}
+    \dfrac{x - x_{i-1}}{x_i - x_{i-1}}
+      & x \in [x_{i-1},\, x_i],\\[8pt]
+    \dfrac{x_{i+1} - x}{x_{i+1} - x_i}
+      & x \in [x_i,\, x_{i+1}],\\[8pt]
+    0 & \text{otherwise},
+  \end{cases}
+  \qquad i = 1,\ldots,N.
+\]
+
+Properties (Lecture~16, p.\,1):
+\begin{itemize}[nosep]
+  \item $\psi_i(x_j) = \delta_{ij}$
+        (equals~1 at node~$i$, zero at all other nodes).
+  \item $\psi_i$ is piecewise linear and continuous;
+        $\psi_i \in H^1(\Omega)$ but $\psi_i \notin C^1(\bar\Omega)$.
+  \item Each $\psi_i$ has \textbf{local support}: nonzero only on the
+        two neighboring elements.
+  \item $\Rightarrow\;(A_n)_{ij} = a(\psi_i,\psi_j) = 0$
+        whenever $|i - j| > 1$
+        $\;\Rightarrow\; A_n$ is \textbf{tridiagonal}.
+\end{itemize}
+
+\subsubsection{Explicit stiffness matrix
+              (1D, equidistant mesh, homogeneous Dirichlet)}
+
+\textit{Source: Num.\ Math.\ II, Lecture~16, p.\,1.}
+
+\medskip\noindent
+For $\Omega = (0,1)$, uniform mesh width $h = 1/(N+1)$, and $u(0) = u(1) = 0$:
+\[
+  (A_n)_{ij}
+  = \int_0^1 \psi_i'(x)\,\psi_j'(x)\dx
+  = \frac{1}{h}
+  \begin{cases}
+    \phantom{-}2  & \text{if } i = j,\\
+    -1            & \text{if } |i-j| = 1,\\
+    \phantom{-}0  & \text{otherwise}.
+  \end{cases}
+\]
+\[
+  A_n = \frac{1}{h}\begin{pmatrix}
+    2 & -1 & & \\
+    -1 & 2 & -1 & \\
+    & \ddots & \ddots & \ddots \\
+    & & -1 & 2
+  \end{pmatrix} \in \R^{N \times N}.
+\]
+The right-hand side is typically computed by numerical quadrature:
+$f_j = \ell(\psi_j) = \int_0^1 f(x)\,\psi_j(x)\dx
+\approx \sum_q w_q\, f(x_q)\,\psi_j(x_q)$.
+
+\begin{warning}[Same as finite differences!]
+The FEM matrix $A_n = \frac{1}{h}\operatorname{tridiag}(-1,2,-1)$ is
+identical to the finite-difference matrix from Lecture~01.
+For linear elements in 1D the two methods coincide.
+This is \emph{not} true in 2D or for higher-order elements.
+\end{warning}
+
+\subsubsection{2D element catalog (Lecture~16, pp.\,2--3)}
+
+On each element $\bar{\Omega}_i$, the local basis function is a polynomial.
+Common FEM choices:
+
+\renewcommand{\arraystretch}{1.4}
+\begin{center}
+\begin{tabular}{@{}llcc@{}}
+  \toprule
+  \textbf{Element type} & \textbf{Cell shape}
+    & \textbf{Nodes} & \textbf{DOFs/elem.}\\
+  \midrule
+  Linear ($P_1$)      & triangle       & 3  & 3  \\
+  Quadratic ($P_2$)   & triangle       & 6  & 6  \\
+  Cubic ($P_3$)       & triangle       & 10 & 10 \\
+  Bilinear ($Q_1$)    & quadrilateral  & 4  & 4  \\
+  Biquadratic ($Q_2$) & quadrilateral  & 9  & 9  \\
+  \bottomrule
+\end{tabular}
+\end{center}
+
+\begin{itemize}[nosep]
+  \item Triangle with degree~$p$:
+        $\binom{p+2}{2}$ nodes
+        (polynomial $\psi_i|_{\bar\Omega_i}
+        = a_0 + a_1 x_1 + a_2 x_2 + \cdots$).
+  \item Quadrilateral with degree~$p$:
+        $(p+1)^2$ nodes (tensor-product polynomial).
+  \item The \textbf{Lagrange polynomial} formula
+        $\ell_i(x) = \prod_{k \neq i}
+        \frac{x - c_k}{c_i - c_k}$
+        guarantees $\ell_i(c_j) = \delta_{ij}$
+        (Lecture~16, p.\,2).
+\end{itemize}
+
+\begin{warning}[Dimension of $V_n$ $\neq$ DOFs/element $\times$
+number of elements]
+The dimension of the resulting subspace $V_n$ depends on the
+\emph{global} node count and the boundary conditions, not simply on
+the per-element DOF count (Lecture~16, p.\,3).
+\end{warning}
+
+% ══════════════════════════════════════════════════════════
+\newpage
+\section{Assembly: Building $A_n$ and $\mathbf{f}$}
+\label{sec:assembly}
+% ══════════════════════════════════════════════════════════
+
+\subsection{Element-wise assembly}
+
+We never compute $(A_n)_{ij}$ by integrating over all of~$\Omega$ at once.
+Since shape functions have local support, each integral reduces to a
+sum over element contributions:
+
+\begin{keyidea}[Assembly via element matrices]
+\[
+  A_n = \sum_c R_c^T\, A_c\, R_c,
+  \qquad
+  \mathbf{f} = \sum_c R_c^T\, \mathbf{f}_c,
+\]
+where:
+\begin{itemize}[nosep]
+  \item $c$ loops over all cells (elements) in the mesh,
+  \item $A_c$ is the \textbf{element stiffness matrix}
+        (small, e.g.\ $3\times 3$ for a $P_1$ triangle),
+  \item $\mathbf{f}_c$ is the \textbf{element load vector},
+  \item $R_c$ is the \textbf{restriction matrix} mapping local DOF
+        indices to global ones.
+\end{itemize}
+\end{keyidea}
+
+\subsection{Integration by numerical quadrature}
+
+The integrals
+$(A_c)_{ij} = \int_{\Omega_c} \nabla\psi_j \cdot \nabla\psi_i\dx$
+are evaluated numerically on a reference element~$\hat{\Omega}$:
+\[
+  \int_{\Omega_c} g(x)\dx
+  \;\approx\;
+  \sum_{q=1}^{n_q} w_q\, g(\mathbf{x}_q)\,|\det J|,
+\]
+where $\{\mathbf{x}_q, w_q\}$ are the quadrature points and weights,
+and $J$ is the Jacobian of the mapping
+$\hat{\Omega} \to \Omega_c$.
+
+\subsection{Boundary conditions in practice}
+
+\textbf{Neumann:} Already incorporated in $\ell(v)$---nothing extra
+to do.
+
+\medskip
+\textbf{Dirichlet ($u = g$ on $\Gamma_D$):}
+For each DOF $i$ on $\Gamma_D$:
+\begin{enumerate}[nosep]
+  \item Set row~$i$ of~$A_n$ to zero except $(A_n)_{ii} = 1$.
+  \item Modify the other rows:
+        $f_j \leftarrow f_j - (A_n)_{ji}\,g_i$ for each $j \neq i$.
+  \item Set $f_i = g_i$.
+\end{enumerate}
+This enforces $d_i = g_i$ while preserving the solution at
+interior nodes.
+
+% ══════════════════════════════════════════════════════════
+\newpage
+\section{Error Estimates}
+\label{sec:error}
+% ══════════════════════════════════════════════════════════
+
+\subsection{Interpolation error}
+
+\begin{definition}[Polynomial interpolation error]
+Given $f \in C^{n+1}[a,b]$ and its interpolating polynomial $p_n$ of
+degree~$n$ at $n+1$ distinct points:
+\[
+  e_n(x)
+  = f(x) - p_n(x)
+  = \frac{f^{(n+1)}(\xi)}{(n+1)!}\;\omega_{n+1}(x),
+  \quad
+  \omega_{n+1}(x)
+  = \prod_{k=0}^{n}(x - x_k).
+\]
+\end{definition}
+
+For FEM shape functions of polynomial degree~$p$ on elements of
+size~$h$:
+\[
+  \norm{\nabla e}_{L^2} \leq \frac{C(p)}{p!}\, h^p.
+\]
+
+\subsection{A priori error estimate}
+
+Combining the interpolation error bound with Galerkin
+orthogonality~\eqref{eq:galerkin-orth}:
+
+\begin{keyidea}[A priori convergence rate]
+For polynomial degree~$p$ and mesh size~$h$:
+\begin{equation}
+  \boxed{\;\norm{\nabla(u - \un)}_{L^2}
+         \leq C\, h^p\, \norm{\nabla^{p+1} u}_{L^2}\;}
+  \label{eq:apriori}
+\end{equation}
+\begin{itemize}[nosep]
+  \item $p=1$ (linear elements): error $\sim \mathcal{O}(h)$.
+        Halve the mesh $\Rightarrow$ halve the error.
+  \item $p=2$ (quadratic elements): error $\sim \mathcal{O}(h^2)$.
+        Halve the mesh $\Rightarrow$ quarter the error.
+\end{itemize}
+\end{keyidea}
+
+\begin{warning}[Regularity matters]
+The estimate requires $u \in H^{p+1}$ (the solution must be smooth
+enough).  On domains with re-entrant corners (e.g.\ L-shaped), the
+solution may have singularities that limit the actual convergence rate
+regardless of~$p$---motivating adaptive mesh refinement.
+\end{warning}
+
+\subsection{A posteriori error estimate}
+
+Given a \emph{computed} solution $\un$, estimate the error
+\emph{without} knowing~$u$:
+\begin{equation}
+  \norm{e_n}_A
+  \leq C \sqrt{\sum_T
+    \Bigl(
+      h_T^2\,\norm{R_T}_T^2
+      + h_T\,\norm{J_E}_{\partial T}^2
+    \Bigr)},
+  \label{eq:aposteriori}
+\end{equation}
+where:
+\begin{itemize}[nosep]
+  \item $R_K = f + \Delta \un$ is the \textbf{cell residual}
+        (how well $\un$ satisfies the PDE inside each element),
+  \item $J_E = -\tfrac{1}{2}\jump{\partial_n \un}$ is the
+        \textbf{edge residual} (jump in normal derivative across
+        element boundaries).
+\end{itemize}
+
+This drives \textbf{adaptive mesh refinement (AMR)}:
+\[
+  \text{solve}
+  \;\to\;
+  \text{mark cells with large error indicators}
+  \;\to\;
+  \text{refine}
+  \;\to\;
+  \text{repeat}.
+\]
+
+% ══════════════════════════════════════════════════════════
+\newpage
+\section{Theory: Existence and Uniqueness}
+\label{sec:laxmilgram}
+% ══════════════════════════════════════════════════════════
+
+\textit{Source: Num.\ Math.\ II, Lecture~17.}
+
+\begin{definition}[Continuity and coercivity]
+Let $\Omega \subset \R^d$ be a bounded polygonal domain and set
+$V = H_0^1(\Omega)$ with norm
+$\norm{u}_V = \norm{u}_{H^1(\Omega)}$.
+Assume $a: V \times V \to \R$ and
+$\ell: V \to \R$ satisfy:
+\begin{enumerate}[label=\alph*),nosep]
+  \item \textbf{Continuity of $a$:}\;
+        $\exists\;\alpha > 0$ such that
+        $|a(v_1,v_2)| \leq \alpha\,\norm{v_1}_V\,\norm{v_2}_V$
+        $\;\forall\, v_1,v_2 \in V$.
+  \item \textbf{Coercivity ($V$-ellipticity) of $a$:}\;
+        $\exists\;\beta > 0$ such that
+        $a(v,v) \geq \beta\,\norm{v}_V^2$
+        $\;\forall\, v \in V$.
+  \item \textbf{Continuity of $\ell$:}\;
+        $\exists\;g > 0$ such that
+        $|\ell(v)| \leq g\,\norm{v}_V$
+        $\;\forall\, v \in V$.
+\end{enumerate}
+\end{definition}
+
+\begin{theorem}[Lax--Milgram]
+Under assumptions (a)--(c), the variational
+problem~\eqref{eq:weak} has a \textbf{unique} solution $u \in V$ with
+the stability estimate
+\[
+  \norm{u}_V \leq \frac{g}{\beta}.
+\]
+\end{theorem}
+
+\begin{intuition}[Lax--Milgram $\approx$ invertibility in disguise]
+Compare with linear algebra (Lecture~17, p.\,2):
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}lcc@{}}
+  \toprule
+  & \textbf{Linear algebra} & \textbf{Variational problem}\\
+  \midrule
+  Problem    & $Ax = b$            & $a(u,v) = \ell(v)$\\
+  Bilinear   & $a(x,y) = y^T A x$ & $a(u,v)$\\
+  Continuity & $|y^T A x| \leq \norm{A}\norm{x}\norm{y}$
+             & $|a(u,v)| \leq \alpha\norm{u}\norm{v}$\\
+  Coercivity & $x^T A x \geq \beta \norm{x}^2$ (pos.\ def.)
+             & $a(v,v) \geq \beta\norm{v}^2$\\
+  Solution   & $x = A^{-1}b$, $\norm{x} \leq \norm{A^{-1}}\norm{b}$
+             & $\norm{u}_V \leq g/\beta$\\
+  \bottomrule
+\end{tabular}
+\end{center}
+Coercivity is the infinite-dimensional version of positive definiteness.
+\end{intuition}
+
+Note: $a$ is \emph{not required to be symmetric} for Lax--Milgram
+(Lecture~17, p.\,2).
+
+\subsection{Variational $\Leftrightarrow$ Minimization
+            (when $a$ is symmetric)}
+
+\textit{Source: Num.\ Math.\ II, Lecture~15, p.\,1.}
+
+\begin{theorem}[Equivalence of VP and MP]
+Let $a$ be symmetric and positive definite.  Define
+$\mathcal{J}: V \to \R$ by
+\[
+  \mathcal{J}(v) = \tfrac{1}{2}\,a(v,v) - \ell(v).
+\]
+Then the variational problem (VP) and the minimization problem
+\[
+  \text{(MP)}\quad
+  \text{Find } u_{\min} \in V \text{ such that }
+  \mathcal{J}(u_{\min}) \leq \mathcal{J}(v)
+  \;\;\forall\, v \in V
+\]
+have the same (unique) solution.
+\end{theorem}
+
+\noindent
+\textit{Proof sketch} (Lecture~15):
+(VP)$\Rightarrow$(MP): Define $w = u_{\min} + \epsilon\,v$ and compute
+$\tilde{\mathcal{J}}(\epsilon) = \mathcal{J}(u_{\min}+\epsilon v)$.
+Minimum at $\epsilon = 0$ implies $\tilde{\mathcal{J}}'(0) = 0$,
+which yields $a(u_{\min},v) = \ell(v)$.
+The reverse direction follows similarly.
+
+% ══════════════════════════════════════════════════════════
+\newpage
+\section{Extension to Higher Dimensions}
+\label{sec:higherdim}
+% ══════════════════════════════════════════════════════════
+
+The variational framework is \textbf{dimension-independent}.
+Moving from 1D to 2D/3D requires changing:
+\begin{enumerate}[nosep]
+  \item \textbf{Mesh:} triangles / quadrilaterals (2D),
+        tetrahedra / hexahedra (3D).
+  \item \textbf{Shape functions $\psi_i$:} e.g.\ linear on triangles
+        (3~nodes), bilinear on quads (4~nodes).
+  \item \textbf{Quadrature rules:} for numerical integration on the
+        reference element.
+  \item \textbf{Reference-to-physical mapping:}
+        Jacobian~$J$ for coordinate transformation.
+\end{enumerate}
+
+Key consequence: in 2D with unstructured meshes, $A_n$ is still
+\textbf{sparse} (each $\psi_i$ overlaps only with neighbors), but the
+sparsity pattern is less regular than the clean banded structure in 1D.
+
+% ══════════════════════════════════════════════════════════
+\newpage
+\section{Notation Reference}
+\label{sec:notation}
+% ══════════════════════════════════════════════════════════
+
+\renewcommand{\arraystretch}{1.3}
+\begin{center}
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
+  \toprule
+  \textbf{Term}
+    & \textbf{Symbol}
+    & \textbf{Meaning} \\
+  \midrule
+  Trial space
+    & $V$
+    & Space where we seek $u$
+      (infinite-dim.) \\
+  Test space
+    & $V_0$
+    & Functions $v$ we multiply by;
+      $v=0$ on $\Gamma_D$ \\
+  Discrete subspace
+    & $V_n$
+    & Finite-dim.\ subspace of $V$;
+      $\dim(V_n) = n$ \\
+  Basis functions
+    & $\psi_1,\ldots,\psi_n$
+    & Piecewise polynomials; basis of $V_n$ \\
+  Unknown coefficients
+    & $d_1,\ldots,d_n$
+    & DOFs: $\un = \sum d_i\,\psi_i$ \\
+  Discrete solution
+    & $u_n$
+    & Approximation in $V_n$ \\
+  Bilinear form
+    & $a(\cdot,\cdot)$
+    & ``Stiffness'' part:
+      $\int \nabla u \cdot \nabla v\dx$ for Poisson \\
+  Linear form
+    & $\ell(\cdot)$
+    & ``Load'' part:
+      $\int f\,v\dx + \int_{\Gamma_N} h\,v\ds$ \\
+  Galerkin matrix
+    & $A_n$
+    & $(A_n)_{ji} = a(\psi_i,\,\psi_j)$;
+      stiffness matrix \\
+  Mass matrix
+    & $M_n$
+    & $(M_n)_{ij} = \int \psi_i\,\psi_j\dx$;
+      appears in time-dep.\ problems \\
+  RHS vector
+    & $\mathbf{f}$
+    & $f_j = \ell(\psi_j)$;
+      load vector \\
+  Galerkin orthogonality
+    &
+    & $a(u-\un,\,\vn) = 0\;\;\forall\,\vn \in V_n$ \\
+  Lax--Milgram
+    &
+    & Continuity + coercivity
+      $\Rightarrow$ unique solution \\
+  A priori estimate
+    &
+    & Error bound in terms of $h$, $p$,
+      and regularity of $u$ \\
+  A posteriori estimate
+    &
+    & Error bound computable from $\un$
+      alone \\
+  AMR
+    &
+    & Adaptive mesh refinement:
+      solve $\to$ estimate $\to$ refine $\to$ repeat \\
+  \bottomrule
+\end{tabularx}
+\end{center}
+
+% ══════════════════════════════════════════════════════════
+\newpage
+\section{Study Roadmap}
+\label{sec:roadmap}
+% ══════════════════════════════════════════════════════════
+
+Recommended reading order for the prerequisite lectures:
+
+\begin{enumerate}
+  \item \textbf{Lecture~12} (pp.\,1--4):
+        Weak form derivation---understand every line, especially the
+        integration-by-parts step on p.\,4.
+  \item \textbf{Lecture~14} (pp.\,1--2):
+        Galerkin 3-step recipe ($V \to V_n \to A_n\mathbf{d}=\mathbf{f}$).
+        Galerkin orthogonality and uniqueness.
+  \item \textbf{Lecture~14} (p.\,3):
+        Positive definiteness depends on the space---work through the
+        two examples.
+  \item \textbf{Lecture~15} (last 2~pages):
+        Admissible decompositions and hat functions---the bridge from
+        Galerkin to FEM.
+  \item \textbf{Lecture~16} (p.\,1):
+        Explicit 1D stiffness matrix---compute $A_n$ by hand for $N=3$.
+  \item \textbf{Lecture~16} (pp.\,2--3):
+        2D element catalog: $P_1$, $P_2$, $Q_1$, $Q_2$, Lagrange
+        polynomials.
+  \item \textbf{Lecture~17} (p.\,1):
+        Neumann BCs in weak form.
+  \item \textbf{Lecture~17} (pp.\,2--3):
+        Lax--Milgram theorem and the analogy with linear algebra.
+\end{enumerate}
+
+\medskip
+\textbf{Self-test:} Starting from $-\Delta u = f$, can you explain why
+``multiply by~$v$ and integrate by parts'' ultimately produces the
+matrix equation $A_n\,\mathbf{d} = \mathbf{f}$?  If yes, you are ready
+for the lecture.
+
+% ══════════════════════════════════════════════════════════
+%
+%  ── SPACE FOR FUTURE CHAPTERS ───────────────────────────
+%  Add new \section{} blocks below as the course progresses.
+%  Suggested upcoming sections:
+%
+%  \section{Software Development with Linux and C/C++}
+%  \section{Elliptic \& Parabolic Problems}
+%  \section{Hyperbolic Problems}
+%  \section{Linear Solvers \& Multigrid}
+%  \section{Stokes Problem}
+%  \section{Navier--Stokes Problem}
+%  \section{Adaptive Mesh Refinement}
+%  \section{High-Performance Computing}
+%
+% ══════════════════════════════════════════════════════════
+
+\end{document}
