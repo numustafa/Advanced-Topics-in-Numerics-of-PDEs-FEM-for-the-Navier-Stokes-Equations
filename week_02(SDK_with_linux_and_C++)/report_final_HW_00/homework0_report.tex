@@ -1,0 +1,383 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{setspace}
+\usepackage{listings}
+\usepackage{courier}
+\usepackage{parskip}
+\usepackage{tikz}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  urlcolor=MidnightBlue,
+  pdftitle={Homework Set 0 Report},
+  pdfauthor={Student},
+}
+
+\definecolor{accent}{RGB}{122,20,24}
+\definecolor{lightgray}{RGB}{245,245,245}
+\definecolor{rulegray}{RGB}{120,120,120}
+
+\titleformat{\section}{\large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.5em}{}
+\titlespacing*{\section}{0pt}{1.2em}{0.5em}
+\titlespacing*{\subsection}{0pt}{0.8em}{0.3em}
+
+\lstdefinestyle{bashstyle}{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{lightgray},
+  frame=single,
+  rulecolor=\color{black!15},
+  framerule=0.4pt,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  xleftmargin=0.3em,
+  xrightmargin=0.3em,
+  aboveskip=0.5em,
+  belowskip=0.5em,
+}
+\lstset{style=bashstyle}
+
+\newcommand{\course}{FEM for the Navier-Stokes Equations}
+\newcommand{\semester}{Summer 2026}
+\newcommand{\professor}{Dr. Peter Münch}
+\newcommand{\studentname}{[Naveed Ul Mustafa]}
+\newcommand{\group}{[group number]}
+\newcommand{\studentemail}{[mustafa@campus.tu-berlin.de]}
+\newcommand{\deadline}{Sun, May 3 2026}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage\ / \pageref*{LastPage}}
+\renewcommand{\headrulewidth}{0pt}
+
+\begin{document}
+
+% Header block inspired by the assignment sheet
+\noindent
+\begin{minipage}[t]{0.62\textwidth}
+{\bfseries TU Berlin}\\
+{\bfseries Institute of Mathematics}\\
+\professor
+\end{minipage}%
+\begin{minipage}[t]{0.38\textwidth}
+\raggedleft
+{\color{accent}\bfseries TECHNISCHE}\\[-0.15em]
+{\color{accent}\bfseries UNIVERSIT\"AT}\\[-0.15em]
+{\color{accent}\bfseries BERLIN}
+\end{minipage}
+
+\vspace{1.2em}
+\noindent
+\begin{minipage}[t]{0.62\textwidth}
+\textit{\course}
+\end{minipage}%
+\begin{minipage}[t]{0.38\textwidth}
+\raggedleft \semester
+\end{minipage}
+
+\vspace{0.35em}
+\hrule
+
+\vspace{1.2em}
+\begin{center}
+    {\LARGE \bfseries 0. Homework Set Report}\\[0.4em]
+    {\normalsize Progress documentation for Problems 0.3 and 0.4}
+\end{center}
+
+\vspace{0.6em}
+\noindent \textbf{Deadline:} \deadline
+
+\vspace{0.6em}
+\noindent
+\begin{tabular}{@{}p{0.18\textwidth}p{0.77\textwidth}@{}}
+\textbf{Student:} & \studentname \\
+\textbf{Email:} & \studentemail \\
+\textbf{Environment:} & Ubuntu on WSL 2 (Windows Subsystem for Linux) \\
+\textbf{Submission scope:} & Problem 0.3 (software setup) and Problem 0.4 (deal.II installation and test) \\
+\end{tabular}
+
+\section{Introduction}
+This report documents the setup of the software environment required for the course and the installation of the finite-element library \texttt{deal.II}. The work was carried out in Ubuntu running under WSL 2 on Windows. The goal was not only to install the requested tools, but also to verify that they work in practice through small functional tests and through the provided \texttt{deal.II} example.
+
+The report is organized as follows. Section 2 summarizes the verified WSL environment. Section 3 documents Problem 0.3, including software installation, version checks, and functional tests. Section 4 documents Problem 0.4, including installation of \texttt{deal.II}, compilation of the supplied example code, generation of output files, and final verification.
+
+\pagebreak
+
+\section{System Environment}
+Before starting the homework tasks, I verified that my Ubuntu distribution was running under WSL 2 and updated the WSL installation itself. The following system information was confirmed:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{>{\bfseries}p{0.34\textwidth}p{0.52\textwidth}}
+\toprule
+WSL component & Verified version \\
+\midrule
+WSL version & 2.6.3.0 \\
+Kernel version & 6.6.87.2-1 \\
+WSLg version & 1.0.71 \\
+MSRDC version & 1.2.6353 \\
+Direct3D version & 1.611.1-81528511 \\
+DXCore version & 10.0.26100.1-240331-1435.ge-release \\
+Windows version & 10.0.26200.8246 \\
+Ubuntu distribution mode & WSL 2 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The WSL status was checked using the standard commands \texttt{wsl --version} and \texttt{wsl -l -v}. The output confirmed that the Ubuntu distribution I use for the course is running with version 2, which is appropriate for the development workflow required in this course.
+
+\pagebreak
+
+\section{Problem 0.3: Installation of Required Software}
+\subsection{Required tools}
+Problem 0.3 required the following software components:
+\begin{itemize}[leftmargin=1.5em]
+    \item a C and C++ compiler,
+    \item CMake,
+    \item Doxygen,
+    \item Git,
+    \item Gmsh,
+    \item ParaView,
+    \item and an IDE of my choice.
+\end{itemize}
+
+For this homework, I used Ubuntu on WSL 2 as the development environment and Visual Studio Code as the IDE.
+
+\subsection{Installation procedure}
+The course files were already organized in my existing homework directory on the mounted Windows drive. For the setup task, I continued working from that directory in WSL. The required packages were installed with \texttt{apt}. Some components, namely \texttt{gcc}/\texttt{g++} and \texttt{git}, were already available, while the remaining software was installed explicitly.
+
+The key installation commands were:
+
+\begin{lstlisting}[language=bash]
+sudo apt update
+sudo apt install -y build-essential clang cmake doxygen git gdb
+sudo apt install -y gmsh paraview
+\end{lstlisting}
+
+During the first attempt, package list inconsistencies led to repository errors. After refreshing the package lists, the installation succeeded. This was followed by direct version checks to ensure that each tool was recognized correctly by the system.
+
+\subsection{Verification of installed software}
+The installed tools were checked with the following commands:
+
+\begin{lstlisting}[language=bash]
+gcc --version
+g++ --version
+clang --version
+cmake --version
+doxygen --version
+git --version
+gmsh --version
+paraview --version
+\end{lstlisting}
+
+The verified versions were:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{>{\bfseries}p{0.30\textwidth}p{0.35\textwidth}}
+\toprule
+Tool & Verified version \\
+\midrule
+gcc & 13.3.0 \\
+g++ & 13.3.0 \\
+clang & 18.1.3 \\
+CMake & 3.28.3 \\
+Doxygen & 1.9.8 \\
+Git & 2.43.0 \\
+Gmsh & 4.12.1 \\
+ParaView & 5.11.2 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+This confirmed that the software requested in Problem 0.3 was installed successfully and available in the working environment.
+
+\subsection{Functional test of the compiler and build system}
+To verify the C++ toolchain, I created a minimal source file \texttt{hello.cpp}:
+
+\begin{lstlisting}
+#include <iostream>
+int main() {
+    std::cout << "Hello from WSL\n";
+    return 0;
+}
+\end{lstlisting}
+
+I then compiled and executed it as follows:
+
+\begin{lstlisting}[language=bash]
+g++ hello.cpp -o hello
+./hello
+\end{lstlisting}
+
+The program compiled and ran successfully and printed:
+
+\begin{lstlisting}
+Hello from WSL
+\end{lstlisting}
+
+To test CMake, I created a simple \texttt{CMakeLists.txt} file and built the project with:
+
+\begin{lstlisting}[language=bash]
+mkdir build
+cd build
+cmake ..
+cmake --build .
+./hello
+\end{lstlisting}
+
+CMake configured the project successfully, generated the build files, and produced the executable without errors. This confirmed that both the compiler toolchain and the build system were functioning as expected.
+
+\subsection{Verification of GUI applications}
+Since the course setup also requires Gmsh and ParaView, I tested whether GUI applications could be launched from the WSL environment. Running the commands below opened both programs successfully:
+
+\begin{lstlisting}[language=bash]
+gmsh
+paraview
+\end{lstlisting}
+
+This confirmed that WSLg support was functioning on my system and that graphical post-processing and mesh inspection tools are usable directly from the Ubuntu environment.
+
+\subsection{Conclusion for Problem 0.3}
+Problem 0.3 was completed successfully. All required software was installed or verified, and the environment was tested through compiler, CMake, and GUI application checks. Based on these tests, the WSL-based setup is ready for continued use throughout the course.
+
+\pagebreak
+
+\section{Problem 0.4: Installation of deal.II}
+\subsection{Installation procedure}
+For Problem 0.4, I followed the package-based installation approach for Ubuntu/WSL using the provided backports repository. The commands used were:
+
+\begin{lstlisting}[language=bash]
+export REPO=ppa:ginggs/deal.ii-9.6.0-backports
+sudo apt-get update
+sudo apt-get install -y software-properties-common
+sudo add-apt-repository $REPO
+sudo apt-get update
+sudo apt-get install -y libdeal.ii-dev
+\end{lstlisting}
+
+After installation, I verified the package presence with:
+
+\begin{lstlisting}[language=bash]
+dpkg -l | grep deal.ii
+\end{lstlisting}
+
+The output confirmed that both \texttt{libdeal.ii-9.6.0} and \texttt{libdeal.ii-dev} were installed successfully.
+
+\subsection{Compilation of the provided example}
+The homework sheet provided a toy example in the directory \texttt{HW\_00\_code\_dealii}. I built and ran this example with the commands:
+
+\begin{lstlisting}[language=bash]
+cd HW_00_code_dealii
+mkdir -p build
+cd build
+cmake ..
+make
+./step-1
+\end{lstlisting}
+
+The CMake configuration detected the GNU compiler correctly and found \texttt{deal.II-9.6.0} at \texttt{/usr}. The example compiled successfully, linked without errors, and produced the executable \texttt{step-1}.
+
+\subsection{Program output and generated files}
+Running the executable produced the following output:
+
+\begin{lstlisting}
+Grid written to grid-1.svg
+Grid written to grid-2.svg
+\end{lstlisting}
+
+The generated files were then verified using:
+
+\begin{lstlisting}[language=bash]
+ls -l grid-1.svg grid-2.svg
+head grid-1.svg
+\end{lstlisting}
+
+The file listing confirmed that both SVG files were present in the build directory, and the content check showed valid SVG markup.
+
+\subsection{Viewing the generated results}
+Direct opening of the SVG file with \texttt{xdg-open} did not work reliably in my WSL environment. However, this did not affect the success of the assignment, because the generated files were accessible and valid. I used the following Windows-side integration commands to inspect the results:
+
+\begin{lstlisting}[language=bash]
+explorer.exe .
+powershell.exe Start-Process grid-1.svg
+\end{lstlisting}
+
+This successfully opened the generated SVG file in the browser through Windows, which is a practical workflow for files generated inside directories mounted from the Windows filesystem.
+
+\subsection{Conclusion for Problem 0.4}
+Problem 0.4 was completed successfully. The \texttt{deal.II} library was installed correctly, the provided toy example compiled and ran without errors, and the expected SVG output files were generated and opened successfully for inspection.
+
+\pagebreak
+
+
+\section{Overall Conclusion}
+Both Problem 0.3 and Problem 0.4 were completed successfully in my Ubuntu-on-WSL-2 environment. The setup now includes a working C/C++ toolchain, build support through CMake, documentation support through Doxygen, version control with Git, mesh and visualization tools through Gmsh and ParaView, and a functioning installation of \texttt{deal.II}. The environment has also been validated through execution of a minimal C++ program and the supplied \texttt{deal.II} example.
+
+Based on these installation and verification steps, I am confident that this WSL-based environment is suitable for use throughout the course.
+
+\pagebreak
+
+\section*{Appendix: Command Summary}
+\begin{lstlisting}[language=bash]
+# Problem 0.3
+sudo apt update
+sudo apt install -y build-essential clang cmake doxygen git gdb
+sudo apt install -y gmsh paraview
+
+gcc --version
+g++ --version
+clang --version
+cmake --version
+doxygen --version
+git --version
+gmsh --version
+paraview --version
+
+g++ hello.cpp -o hello
+./hello
+
+mkdir build
+cd build
+cmake ..
+cmake --build .
+./hello
+
+# Problem 0.4
+export REPO=ppa:ginggs/deal.ii-9.6.0-backports
+sudo apt-get update
+sudo apt-get install -y software-properties-common
+sudo add-apt-repository $REPO
+sudo apt-get update
+sudo apt-get install -y libdeal.ii-dev
+
+dpkg -l | grep deal.ii
+
+cd HW_00_code_dealii
+mkdir -p build
+cd build
+cmake ..
+make
+./step-1
+
+ls -l grid-1.svg grid-2.svg
+head grid-1.svg
+powershell.exe Start-Process grid-1.svg
+\end{lstlisting}
+
+\end{document}

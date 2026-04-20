@@ -1,0 +1,3 @@
+/mnt/d/SoSe 2026/Advanced-Topics-in-Numerics-of-PDEs-FEM-for-the-Navier-Stokes-Equations/week_02(SDK_with_linux_and_C++)/build/CMakeFiles/hello.dir
+/mnt/d/SoSe 2026/Advanced-Topics-in-Numerics-of-PDEs-FEM-for-the-Navier-Stokes-Equations/week_02(SDK_with_linux_and_C++)/build/CMakeFiles/edit_cache.dir
+/mnt/d/SoSe 2026/Advanced-Topics-in-Numerics-of-PDEs-FEM-for-the-Navier-Stokes-Equations/week_02(SDK_with_linux_and_C++)/build/CMakeFiles/rebuild_cache.dir

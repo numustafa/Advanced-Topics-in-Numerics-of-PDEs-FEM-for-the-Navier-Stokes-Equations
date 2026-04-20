@@ -1,0 +1,10 @@
+/mnt/d/SoSe 2026/Advanced-Topics-in-Numerics-of-PDEs-FEM-for-the-Navier-Stokes-Equations/week_02(SDK_with_linux_and_C++)/HW_00_code_dealii/build/CMakeFiles/step-1.dir
+/mnt/d/SoSe 2026/Advanced-Topics-in-Numerics-of-PDEs-FEM-for-the-Navier-Stokes-Equations/week_02(SDK_with_linux_and_C++)/HW_00_code_dealii/build/CMakeFiles/run.dir
+/mnt/d/SoSe 2026/Advanced-Topics-in-Numerics-of-PDEs-FEM-for-the-Navier-Stokes-Equations/week_02(SDK_with_linux_and_C++)/HW_00_code_dealii/build/CMakeFiles/debug.dir
+/mnt/d/SoSe 2026/Advanced-Topics-in-Numerics-of-PDEs-FEM-for-the-Navier-Stokes-Equations/week_02(SDK_with_linux_and_C++)/HW_00_code_dealii/build/CMakeFiles/release.dir
+/mnt/d/SoSe 2026/Advanced-Topics-in-Numerics-of-PDEs-FEM-for-the-Navier-Stokes-Equations/week_02(SDK_with_linux_and_C++)/HW_00_code_dealii/build/CMakeFiles/runclean.dir
+/mnt/d/SoSe 2026/Advanced-Topics-in-Numerics-of-PDEs-FEM-for-the-Navier-Stokes-Equations/week_02(SDK_with_linux_and_C++)/HW_00_code_dealii/build/CMakeFiles/distclean.dir
+/mnt/d/SoSe 2026/Advanced-Topics-in-Numerics-of-PDEs-FEM-for-the-Navier-Stokes-Equations/week_02(SDK_with_linux_and_C++)/HW_00_code_dealii/build/CMakeFiles/strip_comments.dir
+/mnt/d/SoSe 2026/Advanced-Topics-in-Numerics-of-PDEs-FEM-for-the-Navier-Stokes-Equations/week_02(SDK_with_linux_and_C++)/HW_00_code_dealii/build/CMakeFiles/info.dir
+/mnt/d/SoSe 2026/Advanced-Topics-in-Numerics-of-PDEs-FEM-for-the-Navier-Stokes-Equations/week_02(SDK_with_linux_and_C++)/HW_00_code_dealii/build/CMakeFiles/edit_cache.dir
+/mnt/d/SoSe 2026/Advanced-Topics-in-Numerics-of-PDEs-FEM-for-the-Navier-Stokes-Equations/week_02(SDK_with_linux_and_C++)/HW_00_code_dealii/build/CMakeFiles/rebuild_cache.dir
